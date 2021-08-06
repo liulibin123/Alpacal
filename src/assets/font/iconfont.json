@@ -1,0 +1,44 @@
+{
+  "id": "",
+  "name": "",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "129245",
+      "name": "twitter",
+      "font_class": "twitter",
+      "unicode": "e8a8",
+      "unicode_decimal": 59560
+    },
+    {
+      "icon_id": "348667",
+      "name": "medium",
+      "font_class": "medium",
+      "unicode": "eb7b",
+      "unicode_decimal": 60283
+    },
+    {
+      "icon_id": "704799",
+      "name": "telegram",
+      "font_class": "telegram",
+      "unicode": "eaf9",
+      "unicode_decimal": 60153
+    },
+    {
+      "icon_id": "15378292",
+      "name": "discord",
+      "font_class": "discord",
+      "unicode": "eb7a",
+      "unicode_decimal": 60282
+    },
+    {
+      "icon_id": "20278967",
+      "name": "GitHub",
+      "font_class": "GitHub",
+      "unicode": "e5b7",
+      "unicode_decimal": 58807
+    }
+  ]
+}

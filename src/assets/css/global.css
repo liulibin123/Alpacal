@@ -1,0 +1,30 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+ul,
+ol,
+li {
+  list-style-type: none;
+}
+
+#app a {
+  color: #000;
+  text-decoration: none;
+  background-color: transparent;
+}
+
+img {
+  vertical-align: middle;
+  border-style: none;
+}
+
+.clearfix::after {
+  display: block;
+  content: '';
+  clear: both;
+  visibility: hidden;
+  height: 0;
+}
