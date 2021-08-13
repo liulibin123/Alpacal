@@ -24,7 +24,7 @@
                         <div>Balance: 0</div>
                     </div>
                     <div>
-                        <input type="text" placeholder="0.0" v-model="value1">
+                        <input type="text" placeholder="0.0" v-model="value1" @blur="handleInput">
                         <div class="exchange_select">
                             <div class="exchange_max">MAX</div>
                             <div @click="handleShow1">
@@ -41,7 +41,7 @@
                         <div>-</div>
                     </div>
                     <div class="exchange_select">
-                        <input type="text" placeholder="0.0" v-model="value2">
+                        <input type="text" placeholder="0.0" v-model="value2" @blur="handleInput">
                         <div @click="handleShow2">
                             <span v-if="show" style="display: flex;align-items: center"><img :src="this.obj2.img" alt="" style="width: 25px; height: 25px;margin-right: 10px">
                                 <span style="font-weight: 600">{{this.obj2.name}}</span>
@@ -53,7 +53,7 @@
                 <div class="exchange_per" v-if="this.value1 && this.value2 && this.show">
                     <span>Price</span><span>0.0116961 {{this.obj1.name}} per {{this.obj2.name}}</span>
                 </div>
-                <div :class="show ? 'exchange_enter2':'exchange_enter'">Enter an amount</div> 
+                <div :class="show ? 'exchange_enter2':'exchange_enter'" @click="handleSwap">Enter an amount</div> 
             </div>
         </div>
 
@@ -63,7 +63,7 @@
                     <div>Minimum received</div>
                     <div><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
                 </div>
-                <div>35.51 {{this.obj2.name}}</div>
+                <div>{{this.value3}} {{this.obj2.name}}</div>
             </div>
             <div>
                 <div>
@@ -80,7 +80,61 @@
                 <div>0.0002 {{this.obj1.name}}</div>
             </div>
         </div>
-        
+        <!-- hide swap -->
+        <div class="exchange_confirm" v-if="swap">
+            <div></div>
+            <div>
+                <div class="exchange_swap">
+                    <div>
+                        <div>Confirm Swap</div>
+                        <div @click="handleCancleSwap"><svg viewBox="0 0 24 24" color="primary" width="20px" xmlns="http://www.w3.org/2000/svg" class="sc-bdfBwQ fxYfwL"><path d="M18.3 5.70997C17.91 5.31997 17.28 5.31997 16.89 5.70997L12 10.59L7.10997 5.69997C6.71997 5.30997 6.08997 5.30997 5.69997 5.69997C5.30997 6.08997 5.30997 6.71997 5.69997 7.10997L10.59 12L5.69997 16.89C5.30997 17.28 5.30997 17.91 5.69997 18.3C6.08997 18.69 6.71997 18.69 7.10997 18.3L12 13.41L16.89 18.3C17.28 18.69 17.91 18.69 18.3 18.3C18.69 17.91 18.69 17.28 18.3 16.89L13.41 12L18.3 7.10997C18.68 6.72997 18.68 6.08997 18.3 5.70997Z"></path></svg></div>
+                    </div>
+                    <div>
+                        <div><img :src="this.obj1.img" alt=""></div>
+                        <div>{{this.value1}}</div>
+                        <div>{{this.obj1.name}}</div>
+                    </div>
+                    <div><i class="el-icon-bottom"></i></div>
+                    <div>
+                        <div><img :src="this.obj2.img" alt=""></div>
+                        <div>{{this.value2}}</div>
+                        <div>{{this.obj2.name}}</div>
+                    </div>
+                    <div class="exchange_five">
+                        <i>Output is estimated. You will receive at least</i>
+                        <i style="display: flex"><span style="margin-right: 5px">{{this.value2}}</span><span style="margin-right: 5px">{{this.obj2.name}}</span><span></span>or the transaction will revert.</i>
+                    </div>
+                    <div class="exchange_six">
+                        <div>Price</div>
+                        <div>
+                            <span style="margin-right: 5px">{{this.value2}}</span><span style="margin-right: 5px">{{this.obj2.name}} /</span><span>{{this.obj1.name}}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="exchange_seven" style="display: flex">
+                            <div>Minimum received</div>
+                            <div><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                        </div>
+                        <div>{{this.value3}} {{this.obj2.name}}</div>
+                    </div>
+                    <div>
+                        <div class="exchange_eight" style="display: flex">
+                            <div>Price Impact</div>
+                            <div><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                        </div>
+                        <div style="color: #1fc7d4">0.10%</div>
+                    </div>
+                    <div>
+                        <div class="exchange_nine" style="display: flex">
+                            <div>Liquidity Provider Fee</div>
+                            <div><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                        </div>
+                        <div>0.002 {{this.obj1.name}}</div>
+                    </div>
+                    <div @click="handleConfirmSwap">Confirm Swap</div>
+                </div>
+            </div>
+        </div>
         <!-- hide -->
         <div v-if="hide">
             <div class="exchange_op"></div>
@@ -112,48 +166,70 @@
     </div>          
 </template>
 <script>
+import approve from '../../assets/js/approve'
+import allowance from '../../assets/js/allowance'
+import getAmountOut from '../../assets/js/getAmountOut'
+import getAmountIn from '../../assets/js/getAmountIn'
+import getPair from '../../assets/js/getPair'
+import getReserves from '../../assets/js/getReserves'
+import BigNumber from 'bignumber.js'
+import addLiquidity from '../../assets/js/addLiquidity'
+import swapExact from '../../assets/js/swapExactTokensForTokens'
+import addLiquidityETH from '../../assets/js/addLiquidityETH'
 export default {
     data() {
         return {
             datalist: [
                 {
-                    img: 'https://pancakeswap.finance/images/tokens/0xa7f552078dcc247c2684336020c03648500c6d9f.png',
-                    name: 'BNB'
+                    img: 'https://pancake.kiemtienonline360.com/images/coins/bnb.png',
+                    name: 'BNB',
+                    addr: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd'
                 },
                 {
-                    img: 'https://pancakeswap.finance/images/tokens/0x8f0528ce5ef7b51152a59745befdd91d97091d2f.png',
-                    name: 'ALPACA'
+                    img: 'https://pancake.kiemtienonline360.com/images/coins/0x8babbb98678facc7342735486c851abd7a0d17ca.png',
+                    name: 'ETH',
+                    addr: '0x8BaBbB98678facC7342735486C851ABD7A0d17Ca'
                 },
                 {
-                    img: 'https://pancakeswap.finance/images/tokens/0xE0e514c71282b6f4e823703a39374Cf58dc3eA4f.png',
-                    name: 'BELT'
+                    img: 'https://pancake.kiemtienonline360.com/images/coins/0x7ef95a0fee0dd31b22626fa2e10ee6a223f8a684.png',
+                    name: 'USDT',
+                    addr: '0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684'
                 },
                 {
-                    img :'https://pancakeswap.finance/images/tokens/0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c.png',
-                    name: 'BTCB'
+                    img :'https://pancake.kiemtienonline360.com/images//coins/0x8a9424745056eb399fd19a0ec26a14316684e274.png',
+                    name: 'DAT',
+                    addr: '0x8a9424745056Eb399FD19a0EC26A14316684e274'
                 },
                 {
-                    img: 'https://pancakeswap.finance/images/tokens/0xc9849e6fdb743d08faee3e34dd2d1bc69ea11a51.png',
-                    name: 'BUNNY'
+                    img: 'https://pancake.kiemtienonline360.com/images/coins/0xf9f93cf501bfadb6494589cb4b4c15de49e85d0e.png',
+                    name: 'CAKE',
+                    addr: '0xF9f93cF501BFaDB6494589Cb4b4C15dE49E85D0e'
                 },
                 {
                     img: 'https://pancakeswap.finance/images/tokens/0xe9e7cea3dedca5984780bafc599bd69add087d56.png',
-                    name: 'BUSD'
+                    name: 'BUSD',
+                    addr: '0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7'
                 }
             ],
             obj: [],
             obj1: {
                 name: "BNB",
-                img: 'https://pancakeswap.finance/images/tokens/0xa7f552078dcc247c2684336020c03648500c6d9f.png'
+                img: 'https://pancake.kiemtienonline360.com/images/coins/bnb.png',
+                addr: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd'
             },
             obj2: {
                 id: 12,
-                name: 'Select a currency',
+                name: 'Select a currency'
             },
             hide: false,
             show: false,
+            swap: false,
+            cancle: false,
             value1: '',
             value2: '',
+            value3: '',
+            userAddress: '0x3085284c0C028467f07f4bb9C6B739D26ac1bcF7',
+            routerAddress: '0xeaBa760F2f0F68981C9D9816741616277c7AbC3f'
         }
     },
     methods: {
@@ -164,11 +240,13 @@ export default {
                 if(this.obj[0].id && (this.obj2.id == this.obj[0].id)) {
                     this.obj[0].name = this.obj[1].name
                     this.obj[0].img = this.obj[1].img
+                    this.obj[0].addr = this.obj[1].addr
                     this.show = true
                 }
                 else {
                     this.obj[0].name = this.obj[1].name
                     this.obj[0].img = this.obj[1].img
+                    this.obj[0].addr = this.obj[1].addr
                     this.hide1 = false
                 }
                 this.hide = false
@@ -186,6 +264,84 @@ export default {
             this.hide = true
             this.obj = []
             this.handleItem(this.obj2)
+        },
+        handleCancleSwap() {
+            this.swap = false
+        },
+        handleConfirmSwap() {
+            let amount = (new BigNumber(this.value1).multipliedBy(1e18)).toString()
+            swapExact().then(result=>{
+                result.methods.swapExactTokensForTokens(
+                    amount,
+                    amount,
+                    [this.obj1.addr,this.obj2.addr],
+                    this.userAddress,
+                    Math.floor(((new Date).getTime()/1000)+1200)
+                ).send({from: this.userAddress, gas: 1000000}).then(result=>{
+                    console.log(result)
+                })
+            })
+        },
+        handleSwap() {
+            if(this.value1 && this.value2 && this.obj2.name) this.swap = true
+        },
+        handleInput() {
+            let amount1 = (new BigNumber(this.value1).multipliedBy(1e18)).toString()
+            let amount2 = (new BigNumber(this.value2).multipliedBy(1e18)).toString()
+            
+            allowance(this.obj1.addr, this.userAddress, this.routerAddress).then(result=>{
+                if(result < this.value1 || result == undefined){
+                    approve(this.obj1.addr,this.routerAddress)
+                }
+            })
+            allowance(this.obj2.addr, this.userAddress, this.routerAddress).then(result=>{
+                if(result < this.value1 || result == undefined) {
+                    approve(this.obj2.addr,this.routerAddress)
+                }
+            })
+            getPair().then(result1 => {
+                result1.methods.getPair(this.obj1.addr, this.obj2.addr).call().then((result2)=>{
+                    if(result2 === '0x0000000000000000000000000000000000000000'){
+                        if(this.obj1.addr === '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd') {
+                            addLiquidityETH().then(result=>{
+                                result.methods.addLiquidityETH(this.obj1.addr, amount1, 0, 0, this.userAddress, Math.floor(((new Date).getTime()/1000)+1200))
+                                .send({from: this.userAddress, gas: 10000000}).then(result=>{
+                                    console.log(result)
+                                }).catch(console.error())
+                            })
+                        }else {
+                            addLiquidity().then(result=>{
+                                result.methods.addLiquidity(this.obj1.addr, this.obj2.addr, amount1, amount1, 0, 0, this.userAddress, Math.floor(((new Date).getTime()/1000)+1200))
+                                .send({from: this.userAddress, gas: 10000000}).then(result=>{
+                                    console.log(result)
+                                }).catch(console.error())
+                            })
+                        }
+                    }
+                    getReserves(result2).then(result3=>{
+                        result3.methods.getReserves().call().then(result4=>{
+                            getAmountOut().then(result5=>{
+                                result5.methods.getAmountOut(amount1,result4._reserve1,result4._reserve0).call().then(result6=>{
+                                    this.value3 = (result6/1e18).toFixed(5)
+                                })
+                            })
+                            if( !isNaN(amount1) ) {
+                                getAmountIn().then(result5=>{
+                                    result5.methods.getAmountIn(amount1,result4._reserve1,result4._reserve0).call().then(result7=> {
+                                        this.value2 = (result7/1e18).toFixed(5)
+                                    })
+                                })
+                            }else {
+                                getAmountIn().then(result5=>{
+                                    result5.methods.getAmountIn(amount2,result4._reserve0,result4._reserve1).call().then(result7=> {
+                                        this.value1 = (result7/1e18).toFixed(5)
+                                    })
+                                })
+                            }
+                        })
+                    })
+                })
+            })  
         }
     }
 }
@@ -372,6 +528,125 @@ export default {
     }
     .exchange_footer>div>div:first-child {
         flex: 1;
+    }
+    .exchange_confirm {
+        color: rgb(69, 42, 122);
+        font-weight: 500;
+        line-height: 1.5;
+        font-size: 14px;
+        margin: 0 auto;
+    }
+    .exchange_confirm svg {
+        color: rgb(143, 128, 186)
+    }
+    .exchange_confirm img {
+        width: 25px;
+        height: 25px;
+        margin-right: 10px;
+    }
+    .exchange_confirm>div:first-child {
+        position: fixed;
+        top: 0%;
+        left: 0%;
+        width: 100%;
+        height: 100%;
+        background-color: rgb(113, 88, 158);
+        transition: opacity 0.5s ease 0s;
+        opacity: 0.8;
+        z-index: 10;
+    }
+    .exchange_confirm>div:nth-child(2) {
+        border-radius: 20px;
+        border: 1px solid rgb(255, 255, 255);
+        background-color: rgb(255, 255, 255);
+        box-shadow: rgb(25 19 38 / 5%) 0px 4px 8px 0px;
+        align-items: center;
+        position: absolute;
+        top: 20%;
+        transition: opacity 0.5s ease 0s;
+        z-index: 100;
+        color: rgb(40, 13, 95);
+        font-size: 14px;
+        font-weight: 700;
+        padding: 30px 20px;
+        width: 400px;
+    }
+    .exchange_swap>div {
+        display: flex;
+        align-items: center;
+    }
+    .exchange_swap>div:first-child>div:first-child {
+        font-size: 18px;
+        flex: 1;
+    }
+    .exchange_swap>div:first-child>div:last-child {
+        fill: rgb(31, 199, 212);;
+        cursor: pointer;
+    }
+    .exchange_swap>div:nth-child(2) {
+        margin: 40px 0 20px 0;
+    }
+    .exchange_swap>div:nth-child(2)>div:nth-child(2),.exchange_swap>div:nth-child(4)>div:nth-child(2) {
+        font-size: 20px;
+        flex: 1;
+    }
+    .exchange_swap>div:nth-child(2)>div:last-child,.exchange_swap>div:nth-child(4)>div:last-child {
+        font-size: 20px;
+    }
+    .exchange_swap>div:nth-child(3) {
+        font-size: 18px;
+        margin: 0 0 20px 4px;
+        color: rgb(143, 128, 186);
+    }
+    .exchange_swap .exchange_five {
+        display: block;
+        font-weight: 600;
+        margin: 30px 0;
+        i:last-child>span {
+            color: rgb(31, 199, 212);
+            font-weight: 600;
+        }
+    }
+    .exchange_swap>div:nth-child(7),.exchange_swap>div:nth-child(8),.exchange_swap>div:nth-child(9) {
+        font-weight: 500;
+    }
+    .exchange_swap .exchange_six,.exchange_swap .exchange_seven,.exchange_swap .exchange_eight,.exchange_swap .exchange_nine {
+        font-size: 13px;
+    }
+    .exchange_swap .exchange_seven,.exchange_swap .exchange_eight,.exchange_swap .exchange_nine {
+        flex: 1
+    }
+    .exchange_swap .exchange_seven svg,.exchange_swap .exchange_eight svg,.exchange_swap .exchange_nine svg {
+        margin-left: 10px;
+    }
+    .exchange_swap .exchange_six>div:first-child {
+        flex: 1;
+    }.exchange_swap .exchange_six>div:last-child {
+        display: flex;
+    }
+    .exchange_swap>div:last-child {
+        align-items: center;
+        border: 0px;
+        border-radius: 16px;
+        box-shadow: rgb(14 14 44 / 40%) 0px -1px 0px 0px inset;
+        cursor: pointer;
+        display: inline-flex;
+        font-family: inherit;
+        font-size: 16px;
+        font-weight: 600;
+        -webkit-box-pack: center;
+        justify-content: center;
+        letter-spacing: 0.03em;
+        line-height: 1;
+        opacity: 1;
+        outline: 0px;
+        transition: background-color 0.2s ease 0s;
+        height: 48px;
+        padding: 0px 24px;
+        background-color: rgb(31, 199, 212);
+        color: white;
+        width: 100%;
+        margin-top: 20px;
     }
     .exchange_op {
         position: fixed;
