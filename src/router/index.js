@@ -21,7 +21,6 @@ import ChildItem from '../components/Create/CreateChild/ChildItem.vue'
 import CreateChild from '../components/Create/CreateChild/CreateChild.vue'
 import Sell from '../components/Create/Sell/Sell.vue'
 import SellItem from '../components/Create/Sell/SellItem.vue'
-import Pool from '../components/Pool.vue'
 import Pancake from '../components/Pancake.vue'
 import Exchange from '../components/Pancake/Exchange.vue'
 import Liquidity from '../components/Pancake/Liquidity.vue'
@@ -30,6 +29,7 @@ import Find from '../components/Pancake/Find.vue'
 import Add from '../components/Pancake/Add.vue'
 import Pools from '../components/Pancake/Pools.vue'
 import Farms from '../components/Pancake/Farms.vue'
+import Remove from '../components/Pancake/Remove.vue'
 Vue.use(VueRouter)
 
 const routes = [
@@ -55,11 +55,6 @@ const routes = [
     ]
   },
   {
-    path: '/pool',
-    name: 'Pool',
-    component: Pool
-  },
-  {
     path: '/pancake',
     name: 'Pancake',
     component: Pancake,
@@ -71,6 +66,7 @@ const routes = [
       { path: '/pancake/add', component: Add },
       { path: '/pancake/pools', component: Pools },
       { path: '/pancake/farms', component: Farms },
+      { path: '/pancake/remove', component: Remove },
       { path: '/pancake/', redirect: '/pancake/exchange' }
     ]
   },
