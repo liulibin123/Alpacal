@@ -20,20 +20,63 @@
                 </div>
 
                 <div class="liquidity_find">
-                    <div class="liquidity_unconnecte" v-if="hide">
-                        Connect to a wallet to view your liquidity.
+                    <div v-if="hide">
+                        <div class="liquidity_your">Your Liquidity</div>
+                        <div class="liquidity_unconnecte" v-if="lpToken">Connect to a wallet to view your liquidity.</div>
+                        <div v-else style="padding: 0 20px" v-for="data in datalist" :key="data.id">
+                            <div class="liquidity_parent" style="width: 100%">
+                                <div>
+                                    <div class="liquidity_detail">
+                                        <div style="display: flex">
+                                            <div><img :src="data.img1" alt=""></div>
+                                            <div><img :src="data.img2" alt=""></div>
+                                        </div>
+                                        <div>{{data.name1}}/{{data.name2}}</div>
+                                    </div>
+                                    <div @click="handlePool(data)"><i :class="pool ? 'el-icon-arrow-up':'el-icon-arrow-down'"></i></div>
+                                </div>
+                                <div class="liquidity_pool" v-if="pool">
+                                    <div>
+                                        <div>Pooled {{data.name1}}:</div>
+                                        <div>
+                                            <div>35.794</div>
+                                            <div style="margin-left: 10px"><img :src="data.img1" alt=""></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div>Pooled {{data.name2}}:</div>
+                                        <div>
+                                            <div>0.0993691</div>
+                                            <div style="margin-left: 10px"><img :src="data.img2" alt=""></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div>Your pool tokens:</div>
+                                        <div>1.84</div>
+                                    </div>
+                                    <div>
+                                        <div>Your pool share:</div>
+                                        <div>0.01%</div>
+                                    </div>
+                                    <div id="liquidity_remove">
+                                        <router-link tag="div" to="/pancake/add">Add</router-link>
+                                        <router-link tag="div" to="/pancake/remove">Remove</router-link>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div v-else>
                         <div>No liquidity found.</div>
                         <div>Don't see a pool you joined?</div>
-                        <div><router-link to="/pancake/find" tag="div">Find other LP tokens</router-link></div>
+                        <div><router-link to="/pancake/find" tag="div" class="liquidity_router">Find other LP tokens</router-link></div>
                     </div>
                     
                 </div>
                 <div class="liquidity_add">
                     <div>
                         <i class="el-icon-plus"></i>
-                        <router-link tag="div" to="/pancake/add">Add liquidity</router-link>
+                        <router-link tag="div" to="/pancake/add"><div @click="handleNull">Add liquidity</div></router-link>
                     </div>     
                 </div>
             </div> 
@@ -46,12 +89,31 @@ import PubSub from 'pubsub-js'
 export default {
     data() {
         return {
+            datalist: [
+                {
+                    id: '1',
+                    name1: 'BUSD',
+                    img1: 'https://pancake.kiemtienonline360.com/images/coins/bnb.png',
+                    addr1: '0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7',
+                    name2: 'USDT',
+                    img2: 'https://pancake.kiemtienonline360.com/images/coins/0x7ef95a0fee0dd31b22626fa2e10ee6a223f8a684.png',
+                    addr2: '0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684'
+                }
+            ],
             hide: true,
-            address: ''
+            address: '',
+            lpToken: false,
+            pool: false
         }
     },
     methods: {
-        
+        handlePool(data) {
+            this.pool = !this.pool
+            this.$store.commit('changeName',data)
+        },
+        handleNull() {
+            this.$store.commit('changeNull',{})
+        }
     },
     mounted() {
         PubSub.subscribe('address',(msg, data)=>{
@@ -137,8 +199,79 @@ export default {
             font-size: 14px;
             font-weight: 600;
         }
+        .liquidity_parent {
+            border: 2px solid transparent
+        }
+         .liquidity_parent>div:first-child {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+         }
+         .liquidity_parent:hover {
+             border: 2px solid #ddd;
+             border-radius: 20px;
+         }
+         .liquidity_parent img {
+             width: 25px;
+             height: 25px
+         }
+         .liquidity_parent i {
+             cursor: pointer;
+             font-size: 18px;
+             font-weight: 700;
+             color: rgb(69, 42, 122);
+         }
+        .liquidity_your {
+            display: flex;
+            margin-left: 20px;
+        }
         .liquidity_unconnecte {
             margin: 30px 0;
+            color: #bbb;
+        }
+        .liquidity_detail {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }.liquidity_pool>div>div:first-child {
+            display: flex;
+            flex: 1;
+            justify-content: start;
+        }
+        .liquidity_pool>div {
+            padding: 5px 20px;
+            display: flex;
+            align-items: center;
+        }
+        .liquidity_pool>div>div:last-child {
+            display: flex;
+            align-items: center;
+        }
+        .liquidity_pool #liquidity_remove {
+            color: #fff;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        .liquidity_pool #liquidity_remove>div {
+            flex:1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 48px;
+            background-color: rgb(31, 199, 212);
+            box-shadow: rgb(14 14 44 / 40%) 0px -1px 0px 0px inset;
+            cursor: pointer;
+            border-radius: 16px;
+        }
+        .liquidity_pool #liquidity_remove>div:hover {
+            opacity: 0.6;
+        }
+        .liquidity_pool #liquidity_remove>div:first-child {
+            margin-right: 15px;
+        }
+        .liquidity_detail>div:first-child {
+            margin-right: 20px;
         }
         .liquidity_find>div>div:first-child {
             margin-top: 20px;
@@ -152,7 +285,7 @@ export default {
             justify-content: center;
             margin-bottom: 20px;
         }
-        .liquidity_find>div>div:last-child>div {
+        .liquidity_find .liquidity_router {
             border: 3px solid rgb(31, 199, 212);
             border-radius: 20px;
             padding: 4px 10px;

@@ -24,7 +24,7 @@
                         <div>Balance: 0</div>
                     </div>
                     <div>
-                        <input type="text" placeholder="0.0" v-model="value1" @blur="handleInput">
+                        <input type="text" placeholder="0.0" v-model="value1">
                         <div class="exchange_select">
                             <div class="exchange_max">MAX</div>
                             <div @click="handleShow1">
@@ -41,7 +41,7 @@
                         <div>-</div>
                     </div>
                     <div class="exchange_select">
-                        <input type="text" placeholder="0.0" v-model="value2" @blur="handleInput">
+                        <input type="text" placeholder="0.0" v-model="value2">
                         <div @click="handleShow2">
                             <span v-if="show" style="display: flex;align-items: center"><img :src="this.obj2.img" alt="" style="width: 25px; height: 25px;margin-right: 10px">
                                 <span style="font-weight: 600">{{this.obj2.name}}</span>
@@ -51,7 +51,7 @@
                     </div>
                 </div>
                 <div class="exchange_per" v-if="this.value1 && this.value2 && this.show">
-                    <span>Price</span><span>0.0116961 {{this.obj1.name}} per {{this.obj2.name}}</span>
+                    <span>Price</span><span>{{this.num2}} {{this.obj1.name}} per {{this.obj2.name}}</span>
                 </div>
                 <div :class="show ? 'exchange_enter2':'exchange_enter'" @click="handleSwap">Enter an amount</div> 
             </div>
@@ -63,7 +63,7 @@
                     <div>Minimum received</div>
                     <div><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
                 </div>
-                <div>{{this.value3}} {{this.obj2.name}}</div>
+                <div>{{this.num3*this.value1}} {{this.obj2.name}}</div>
             </div>
             <div>
                 <div>
@@ -102,12 +102,12 @@
                     </div>
                     <div class="exchange_five">
                         <i>Output is estimated. You will receive at least</i>
-                        <i style="display: flex"><span style="margin-right: 5px">{{this.value2}}</span><span style="margin-right: 5px">{{this.obj2.name}}</span><span></span>or the transaction will revert.</i>
+                        <i style="display: flex"><span style="margin-right: 5px">{{this.num3}}</span><span style="margin-right: 5px">{{this.obj2.name}}</span><span></span>or the transaction will revert.</i>
                     </div>
                     <div class="exchange_six">
                         <div>Price</div>
                         <div>
-                            <span style="margin-right: 5px">{{this.value2}}</span><span style="margin-right: 5px">{{this.obj2.name}} /</span><span>{{this.obj1.name}}</span>
+                            <span style="margin-right: 5px">{{this.num1}}</span><span style="margin-right: 5px">{{this.obj2.name}} /</span><span>{{this.obj1.name}}</span>
                         </div>
                     </div>
                     <div>
@@ -115,7 +115,7 @@
                             <div>Minimum received</div>
                             <div><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
                         </div>
-                        <div>{{this.value3}} {{this.obj2.name}}</div>
+                        <div>{{this.num3}} {{this.obj2.name}}</div>
                     </div>
                     <div>
                         <div class="exchange_eight" style="display: flex">
@@ -166,16 +166,16 @@
     </div>          
 </template>
 <script>
-import approve from '../../assets/js/approve'
-import allowance from '../../assets/js/allowance'
 import getAmountOut from '../../assets/js/getAmountOut'
 import getAmountIn from '../../assets/js/getAmountIn'
 import getPair from '../../assets/js/getPair'
 import getReserves from '../../assets/js/getReserves'
 import BigNumber from 'bignumber.js'
-import addLiquidity from '../../assets/js/addLiquidity'
 import swapExact from '../../assets/js/swapExactTokensForTokens'
-import addLiquidityETH from '../../assets/js/addLiquidityETH'
+import getAmountsOut from '../../assets/js/getAmountsOut'
+import getAmountsIn from '../../assets/js/getAmountsIn'
+import swapExactETH from '../../assets/js/swapExactETHForTokens'
+import swapExactTokensForETH from '../../assets/js/swapExactTokensForETH'
 export default {
     data() {
         return {
@@ -228,6 +228,10 @@ export default {
             value1: '',
             value2: '',
             value3: '',
+            num1: '',
+            num2: '',
+            num3: '',
+            num4: '',
             userAddress: '0x3085284c0C028467f07f4bb9C6B739D26ac1bcF7',
             routerAddress: '0xeaBa760F2f0F68981C9D9816741616277c7AbC3f'
         }
@@ -270,78 +274,98 @@ export default {
         },
         handleConfirmSwap() {
             let amount = (new BigNumber(this.value1).multipliedBy(1e18)).toString()
-            swapExact().then(result=>{
-                result.methods.swapExactTokensForTokens(
-                    amount,
-                    amount,
-                    [this.obj1.addr,this.obj2.addr],
-                    this.userAddress,
-                    Math.floor(((new Date).getTime()/1000)+1200)
-                ).send({from: this.userAddress, gas: 1000000}).then(result=>{
-                    console.log(result)
+            // let amount2 = (new BigNumber(this.value2).multipliedBy(1e18)).toString()
+            if(this.obj1.addr === '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd') {
+                swapExactETH().then(result=>{
+                    result.methods.swapExactETHForTokens(
+                        0,
+                        [this.obj2.addr],
+                        this.userAddress,
+                        Math.floor(((new Date).getTime()/1000)+1200)
+                    ).send({from: this.userAddress, gas: 1000000}).then(result=>{
+                        console.log(result)
+                    })
                 })
-            })
+            }
+            else if(this.obj2.addr === '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd') {
+                swapExactTokensForETH().then(result=>{
+                    result.methods.swapExactTokensForETH(
+                        amount,
+                        0,
+                        [this.obj1.addr],
+                        this.userAddress,
+                        Math.floor(((new Date).getTime()/1000)+1200)
+                    )
+                }).send({from: this.userAddress, gas: 1000000}).then(result=>{
+                        console.log(result)
+                })
+            }
+            else {
+                swapExact().then(result=>{
+                    result.methods.swapExactTokensForTokens(
+                        amount,
+                        amount,
+                        [this.obj1.addr,this.obj2.addr],
+                        this.userAddress,
+                        Math.floor(((new Date).getTime()/1000)+1200)
+                    ).send({from: this.userAddress, gas: 1000000}).then(result=>{
+                        console.log(result)
+                    })
+                })
+            }         
         },
         handleSwap() {
             if(this.value1 && this.value2 && this.obj2.name) this.swap = true
         },
-        handleInput() {
-            let amount1 = (new BigNumber(this.value1).multipliedBy(1e18)).toString()
-            let amount2 = (new BigNumber(this.value2).multipliedBy(1e18)).toString()
-            
-            allowance(this.obj1.addr, this.userAddress, this.routerAddress).then(result=>{
-                if(result < this.value1 || result == undefined){
-                    approve(this.obj1.addr,this.routerAddress)
-                }
-            })
-            allowance(this.obj2.addr, this.userAddress, this.routerAddress).then(result=>{
-                if(result < this.value1 || result == undefined) {
-                    approve(this.obj2.addr,this.routerAddress)
-                }
+    },
+    watch: {
+        'value1': function() {
+            let amount = (new BigNumber(this.value1).multipliedBy(1e18)).toString()
+            getAmountsIn().then(result5=> {
+                result5.methods.getAmountsIn(amount, [this.obj1.addr, this.obj2.addr]).call().then(result=>{
+                    this.value2 = (result[0]/1e18).toFixed(5)
+                })
             })
             getPair().then(result1 => {
-                result1.methods.getPair(this.obj1.addr, this.obj2.addr).call().then((result2)=>{
-                    if(result2 === '0x0000000000000000000000000000000000000000'){
-                        if(this.obj1.addr === '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd') {
-                            addLiquidityETH().then(result=>{
-                                result.methods.addLiquidityETH(this.obj1.addr, amount1, 0, 0, this.userAddress, Math.floor(((new Date).getTime()/1000)+1200))
-                                .send({from: this.userAddress, gas: 10000000}).then(result=>{
-                                    console.log(result)
-                                }).catch(console.error())
-                            })
-                        }else {
-                            addLiquidity().then(result=>{
-                                result.methods.addLiquidity(this.obj1.addr, this.obj2.addr, amount1, amount1, 0, 0, this.userAddress, Math.floor(((new Date).getTime()/1000)+1200))
-                                .send({from: this.userAddress, gas: 10000000}).then(result=>{
-                                    console.log(result)
-                                }).catch(console.error())
-                            })
-                        }
-                    }
+                result1.methods.getPair(this.obj1.addr, this.obj2.addr).call().then(result2 => {
                     getReserves(result2).then(result3=>{
                         result3.methods.getReserves().call().then(result4=>{
                             getAmountOut().then(result5=>{
-                                result5.methods.getAmountOut(amount1,result4._reserve1,result4._reserve0).call().then(result6=>{
-                                    this.value3 = (result6/1e18).toFixed(5)
+                                result5.methods.getAmountOut((new BigNumber(1).multipliedBy(1e18)).toString(),result4._reserve1,result4._reserve0).call().then(result6=>{
+                                    this.num3 = (result6/1e18).toFixed(5)
                                 })
                             })
-                            if( !isNaN(amount1) ) {
-                                getAmountIn().then(result5=>{
-                                    result5.methods.getAmountIn(amount1,result4._reserve1,result4._reserve0).call().then(result7=> {
-                                        this.value2 = (result7/1e18).toFixed(5)
-                                    })
+                            getAmountOut().then(result5=>{
+                                result5.methods.getAmountOut((new BigNumber(1).multipliedBy(1e18)).toString(),result4._reserve0,result4._reserve1).call().then(result6=>{
+                                    this.num4 = (result6/1e18).toFixed(5)
                                 })
-                            }else {
-                                getAmountIn().then(result5=>{
-                                    result5.methods.getAmountIn(amount2,result4._reserve0,result4._reserve1).call().then(result7=> {
-                                        this.value1 = (result7/1e18).toFixed(5)
-                                    })
+                            })
+                            getAmountIn().then(result5=>{
+                                result5.methods.getAmountIn((new BigNumber(1).multipliedBy(1e18)).toString(),result4._reserve0,result4._reserve1).call().then(result7=> {
+                                    this.num1 = (result7/1e18).toFixed(5)
+                                    console.log((result7/1e18).toFixed(5))
                                 })
-                            }
+                            })
+                            getAmountIn().then(result5=>{
+                                result5.methods.getAmountIn((new BigNumber(1).multipliedBy(1e18)).toString(),result4._reserve1,result4._reserve0).call().then(result7=> {
+                                    console.log((result7/1e18).toFixed(5))
+                                    this.num2 = (result7/1e18).toFixed(5)
+                                })
+                            })
+                               
                         })
                     })
                 })
-            })  
+            })
+        },
+        'value2': function() {
+            let amount = (new BigNumber(this.value2).multipliedBy(1e18)).toString()
+            getAmountsOut().then(result5=> {
+                console.log(result5)
+                result5.methods.getAmountsOut(amount, [this.obj1.addr, this.obj2.addr]).call().then(result=>{
+                    this.value1 = (result[1]/1e18).toFixed(5)
+                })
+            }) 
         }
     }
 }
